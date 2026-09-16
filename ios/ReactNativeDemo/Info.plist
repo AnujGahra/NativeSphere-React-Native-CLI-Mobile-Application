@@ -4,6 +4,8 @@
 <dict>
 	<key>NSCameraUsageDescription</key>
 <string>NativeSphere needs camera access to capture photos.</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>NativeSphere needs microphone access to record audio.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
