@@ -6,6 +6,8 @@
 <string>NativeSphere needs camera access to capture photos.</string>
 <key>NSMicrophoneUsageDescription</key>
 <string>NativeSphere needs microphone access to record audio.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>NativeSphere uses your location to demonstrate native location capabilities.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
