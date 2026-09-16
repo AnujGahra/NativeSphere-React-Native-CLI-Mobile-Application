@@ -1,80 +1,91 @@
 import { useCallback, useEffect, useState } from 'react';
-
 import {
-    getPermissionStatus,
-    requestPermission,
-} from '../services/permissionService';
+    check,
+    openSettings,
+    request,
+    RESULTS,
+    PERMISSIONS,
+} from 'react-native-permissions';
 
-const permissions = [
-    'camera',
-    'microphone',
-    'location',
-];
+const permissionMap = {
+    camera: {
+        android: PERMISSIONS.ANDROID.CAMERA,
+        ios: PERMISSIONS.IOS.CAMERA,
+    },
+
+    microphone: {
+        android: PERMISSIONS.ANDROID.RECORD_AUDIO,
+        ios: PERMISSIONS.IOS.MICROPHONE,
+    },
+
+    location: {
+        android: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+        ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+    },
+};
 
 const usePermissions = () => {
-    const [statuses, setStatuses] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [permissions, setPermissions] = useState({});
 
-    const loadPermissions = useCallback(async () => {
+    const checkPermission = useCallback(async type => {
         try {
-            setLoading(true);
-            setError(null);
+            const permission =
+                permissionMap[type]?.[Platform.OS];
 
-            const results = {};
-
-            for (const permission of permissions) {
-                results[permission] =
-                    await getPermissionStatus(permission);
+            if (!permission) {
+                return RESULTS.UNAVAILABLE;
             }
 
-            setStatuses(results);
-        } catch (err) {
-            setError(
-                err.message ||
-                'Unable to check permissions.',
-            );
-        } finally {
-            setLoading(false);
+            return await check(permission);
+        } catch (error) {
+            console.error('Permission check error:', error);
+            return RESULTS.UNAVAILABLE;
         }
     }, []);
 
-    const request = useCallback(
-        async permission => {
-            try {
-                setError(null);
+    const refreshPermissions = useCallback(async () => {
+        const result = {};
 
-                const result =
-                    await requestPermission(permission);
+        for (const type of Object.keys(permissionMap)) {
+            result[type] = await checkPermission(type);
+        }
 
-                setStatuses(previous => ({
-                    ...previous,
-                    [permission]: result,
-                }));
+        setPermissions(result);
+    }, [checkPermission]);
 
-                return result;
-            } catch (err) {
-                setError(
-                    err.message ||
-                    'Unable to request permission.',
-                );
+    const requestPermission = useCallback(async type => {
+        try {
+            const permission =
+                permissionMap[type]?.[Platform.OS];
 
-                return null;
+            if (!permission) {
+                return RESULTS.UNAVAILABLE;
             }
-        },
-        [],
-    );
+
+            const result = await request(permission);
+
+            await refreshPermissions();
+
+            return result;
+        } catch (error) {
+            console.error('Permission request error:', error);
+            return RESULTS.UNAVAILABLE;
+        }
+    }, [refreshPermissions]);
+
+    const openAppSettings = useCallback(async () => {
+        await openSettings();
+    }, []);
 
     useEffect(() => {
-        loadPermissions();
-    }, [loadPermissions]);
+        refreshPermissions();
+    }, [refreshPermissions]);
 
     return {
-        statuses,
-        loading,
-        error,
-        refresh: loadPermissions,
-        request,
+        permissions,
+        requestPermission,
+        refreshPermissions,
+        openAppSettings,
     };
 };
 
