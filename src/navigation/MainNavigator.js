@@ -1,6 +1,8 @@
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Text } from 'react-native';
+
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from '../screens/Home/HomeScreen';
 import NetworkScreen from '../screens/Network/NetworkScreen';
@@ -11,6 +13,8 @@ import DeviceInfoScreen from '../screens/Device/DeviceInfoScreen';
 import PermissionsScreen from '../screens/Permissions/PermissionsScreen';
 import AboutScreen from '../screens/About/AboutScreen';
 
+import { theme } from '../theme/theme';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -19,9 +23,6 @@ const HomeStack = () => {
         <Stack.Navigator
             screenOptions={{
                 headerShown: false,
-                contentStyle: {
-                    backgroundColor: '#070B14',
-                },
             }}>
             <Stack.Screen
                 name="HomeDashboard"
@@ -59,45 +60,61 @@ const HomeStack = () => {
 const MainNavigator = () => {
     return (
         <Tab.Navigator
-            screenOptions={{
+            initialRouteName="Home"
+            screenOptions={({ route }) => ({
                 headerShown: false,
 
+                tabBarActiveTintColor: theme.colors.primary,
+                tabBarInactiveTintColor: theme.colors.textMuted,
+
                 tabBarStyle: {
-                    backgroundColor: '#0D1322',
-                    borderTopColor: '#263044',
-                    height: 65,
+                    backgroundColor: theme.colors.surface,
+                    borderTopColor: theme.colors.border,
+                    height: 64,
                     paddingBottom: 8,
                     paddingTop: 8,
                 },
 
-                tabBarActiveTintColor: '#7C5CFC',
-                tabBarInactiveTintColor: '#697386',
-            }}>
+                tabBarLabelStyle: {
+                    fontSize: 11,
+                    fontWeight: '600',
+                },
+
+                tabBarIcon: ({ focused }) => {
+                    let icon = '⌂';
+
+                    if (route.name === 'Permissions') {
+                        icon = '🔐';
+                    }
+
+                    if (route.name === 'About') {
+                        icon = 'ⓘ';
+                    }
+
+                    return (
+                        <Text
+                            style={{
+                                fontSize: 19,
+                                opacity: focused ? 1 : 0.6,
+                            }}>
+                            {icon}
+                        </Text>
+                    );
+                },
+            })}>
             <Tab.Screen
                 name="Home"
                 component={HomeStack}
-                options={{
-                    tabBarLabel: 'Home',
-                    tabBarIcon: () => '⌂',
-                }}
             />
 
             <Tab.Screen
                 name="Permissions"
                 component={PermissionsScreen}
-                options={{
-                    tabBarLabel: 'Permissions',
-                    tabBarIcon: () => '🔐',
-                }}
             />
 
             <Tab.Screen
                 name="About"
                 component={AboutScreen}
-                options={{
-                    tabBarLabel: 'About',
-                    tabBarIcon: () => 'ⓘ',
-                }}
             />
         </Tab.Navigator>
     );
